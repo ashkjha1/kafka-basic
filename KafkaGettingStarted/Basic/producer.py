@@ -1,0 +1,39 @@
+from confluent_kafka import Producer
+from data_generator import generate_message
+import json
+import time
+import random
+import os 
+from dotenv import load_dotenv
+load_dotenv()
+
+def delivery_report(err, msg):
+    """ Called once for each message produced. """
+    if err is not None:
+        print(f"Delivery failed for message key {msg.key()}: {err}")
+    else:
+        print(f"Message produced: {msg.value()} to partition {msg.partition()}")
+
+def produce_messages(bootstrap_servers, topic):
+    producer = Producer({'bootstrap.servers': bootstrap_servers})
+
+    message=generate_message()
+    encoded_message=json.dumps(message).encode('utf-8')
+
+    # Asynchronous producer
+    try:
+        for i in range(10):
+            key=json.dumps(random.randint(1,10)).encode('utf-8')
+            producer.produce(topic, key=key, value=encoded_message, callback=delivery_report, partition=i%3)
+
+        # Block for up to 1 second for events. Callbacks will be invoked during
+        # this method call if the message was acknowledged.
+        producer.poll(1.0)
+    finally:
+        # Wait for any outstanding messages to be delivered and then close the producer
+        producer.flush()
+
+if __name__ == '__main__':
+    bootstrap_servers = os.getenv('SERVER')  # Replace with your Kafka broker(s)
+    topic = os.getenv('TOPIC')
+    produce_messages(bootstrap_servers, topic)
