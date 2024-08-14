@@ -22,9 +22,9 @@ def produce_messages(bootstrap_servers, topic):
 
     # Asynchronous producer
     try:
-        for i in range(10):
-            key=json.dumps(random.randint(1,10)).encode('utf-8')
-            producer.produce(topic, key=key, value=encoded_message, callback=delivery_report, partition=i%3)
+        # for i in range(10):
+        key=json.dumps(random.randint(1,10)).encode('utf-8')
+        producer.produce(topic, key=key, value=encoded_message, callback=delivery_report, partition=0)
 
         # Block for up to 1 second for events. Callbacks will be invoked during
         # this method call if the message was acknowledged.

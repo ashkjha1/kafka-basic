@@ -22,6 +22,21 @@ def consume_messages(bootstrap_servers, topic, group_id):
                 print(f"Consumer error: {msg.error()}")
             else:
                 print(f"Consumed message: {msg.value().decode('utf-8')}")
+                print("-------------------------------")
+                print(f"Error: {msg.error()}")
+                print(f"Headers: {msg.headers()}")
+                print(f"Key: {msg.key().decode()}")
+                print(f"Latency: {msg.latency()}")
+                print(f"Leader Epoch: {msg.leader_epoch()}")
+                print(f"Offset: {msg.offset()}")
+                print(f"Partition: {msg.partition()}")
+                # If you have custom attributes, access them here
+                # print(f"Set Headers: {msg.set_headers}")  # Replace with correct access
+                # print(f"Set Key: {msg.set_key}")        # Replace with correct access
+                # print(f"Set Value: {msg.set_value}")    # Replace with correct access
+                print(f"Timestamp: {msg.timestamp()}")
+                print(f"Topic: {msg.topic()}")
+                print(f"Value: {msg.value().decode()}")
     except KeyboardInterrupt:
         pass
     finally:
