@@ -4,26 +4,34 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
-bootstrap_servers = os.getenv('SERVER')
-topic = os.getenv('TOPIC')
+def consume_messages(bootstrap_servers, topic, group_id):
+    consumer = Consumer({
+        'bootstrap.servers': bootstrap_servers,
+        'group.id': group_id,
+        'auto.offset.reset': 'earliest'
+    })
 
-if __name__ == '__main__':
-    # Kafka Consumer 
-    conf = {'bootstrap.servers': bootstrap_servers,
-            'group.id': 'consumer-group',
-            'auto.offset.reset': 'earliest'
-        }
+    consumer.subscribe([topic])
 
-    consumer = Consumer(conf)
+    try:
+        while True:
+            msg = consumer.poll(1.0)
+            if msg is None:
+                continue
+            if msg.error():
+                print(f"Consumer error: {msg.error()}")
+            else:
+                print(f"Consumed message: {msg.value().decode('utf-8')}")
+    except KeyboardInterrupt:
+        pass
+    finally:
+        consumer.close()
 
-    messages=consumer.subscribe([topic])
+if __name__=="__main__":
+    bootstrap_servers = os.getenv('SERVER')
+    topic = os.getenv('TOPIC')
 
-    while True:
-        msg = consumer.poll(1.0)
-        if msg is None:
-            continue
-        if msg.error():
-            print('Consumer error: {}'.format(msg.error()))
-            continue
-        print('Received Key: {}'.format(msg.key()))
-        print('Received message: {}'.format(msg.value()))
+    bootstrap_servers = bootstrap_servers
+    topic = topic
+    group_id = "consumer-test-group"
+    consume_messages(bootstrap_servers, topic, group_id)
